@@ -168,7 +168,7 @@ lee_firmas=function(dir_signature,Treatment,Levels,Replicates,Date_start,extensi
 }
 ###############Promedio firmas espectrales
 stats_fir=function(.fir,Replicate=F){
-  .fir=firmasSpectrales;Replicate=T
+  # .fir=firmasSpectrales;Replicate=T
   if(Replicate){
     G=list()
     for(m in 1:length(.fir)){
@@ -268,7 +268,7 @@ cal_IV=function(.fir,Replicate=F){
           # Indice modificado Red Edge Ratio simple
           r445=p$reflec[which(p$wave==445)]
           mSR=(r705-r445)/(r705+r445)
-          #MCARI Indice modificado de relaciI³n en absorciI³n de clorofila
+          #MCARI Indice modificado de relaciI?n en absorciI?n de clorofila
           r550=p$reflec[which(p$wave==500)]
           MCARI=((r700-r670)-0.2*(r700-r550))*(r700/r670)
           # TCARI Indice de reflectancia de absorciOn transformada de clorofila
@@ -337,7 +337,7 @@ cal_IV=function(.fir,Replicate=F){
       # Indice modificado Red Edge Ratio simple
       r445=p$reflec[which(p$wave==445)]
       mSR=(r705-r445)/(r705+r445)
-      #MCARI Indice modificado de relaciI³n en absorciI³n de clorofila
+      #MCARI Indice modificado de relaciI?n en absorciI?n de clorofila
       r550=p$reflec[which(p$wave==500)]
       MCARI=((r700-r670)-0.2*(r700-r550))*(r700/r670)
       # TCARI Indice de reflectancia de absorciOn transformada de clorofila
