@@ -21,17 +21,18 @@ lee_firmas=function(dir_signature,Treatment,Levels,Replicates,Date_start,extensi
     Replicates=as.character(Replicates)
     e=list()
     for(i in 1:length(Treatment)){
-      # i=2
+       # i=2
       foldersT=list.dirs(foldersF,full.names = T)
       posT=str_which(foldersF,Treatment[i])
       matrix.fir=list()
       for(j in 1:length(Levels)){
+        # j=1
         x=paste0("/",Levels[j])
         foldersN=foldersF[posT]
         posN=str_which(foldersN,x)
         if(length(posN)>0){
           repli=lapply(Replicates,function(y){
-             # y=Replicates[2]
+             # y=Replicates[1]
             g=paste0("/",y)
             foldersR=foldersN[posN]
             posR=str_which(foldersR,g)
