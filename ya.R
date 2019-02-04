@@ -406,85 +406,205 @@ plot_IV=function(.IV,nameIV){
   p
 }
 #########################plot stats###############
-plots_stats=function(stats_fir){
-##########create dir
-dir=paste0(getwd(),"/Plots")
-if(!file.exists(dir)){
-  dir.create(dir)
-}
-dir1=paste0(dir,"/Treatment")
-if(!file.exists(dir1)){
-  dir.create(dir1)
-}
-dir2=paste0(dir,"/Levels")
-if(!file.exists(dir2)){
-  dir.create(dir2)
-}
-stats_fir=melt(stats_fir);names(stats_fir)=c("stats","wave","reflec","Levels","Treatment")
-for (i in 1:length(unique(stats_fir$Treatment))) {
-  for (j in 1:3) {
-    Tra=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[i]),]
-    mean=Tra[which(Tra$stats==unique(Tra$stats)[j]),]
-    name=paste0(dir1,"/",unique(Tra$stats)[j],"_",unique(stats_fir$Treatment)[i],".png")
-    png(filename=name,width = 726, height = 469)
-    ###########plot Treatment
-    p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Levels),size=0.72)+
-      theme_bw()+
-      geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
-                 linetype="dashed",color = "black")+
-      annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
-               label = c("B","G","R","NIR","RE"))+
-      theme(legend.text=element_text(size=10))
-    if(j==1){
-      p=p+labs(title = paste0("Mean Feature Spectral"),
-               subtitle = paste0("Levels ",unique(Tra$Treatment)),
-               x = "Wavelength", y = "Reflectance (%)") 
+plots_stats=function(stats_fir,Replicate=F){
+  # stats_fir=stats_Beans;Replicate=T
+  if(Replicate){
+    dir=paste0(getwd(),"/Plots")
+    if(!file.exists(dir)){
+      dir.create(dir)
     }
-    if(j==2){
-      p=p+labs(title = paste0("SD Feature Spectral"),
-               subtitle = paste0("Levels ",unique(Tra$Treatment)),
-               x = "Wavelength", y = "Standard Deviation") 
+    dir1=paste0(dir,"/Treatment")
+    if(!file.exists(dir1)){
+      dir.create(dir1)
     }
-    if(j==3){
-      p=p+labs(title = paste0("CV Feature Spectral"),
-               subtitle = paste0("Levels ",unique(Tra$Treatment)),
-               x = "Wavelength", y = "Coefficient Variation (%)") 
+    dir2=paste0(dir,"/Levels")
+    if(!file.exists(dir2)){
+      dir.create(dir2)
     }
-    print(p)
-    dev.off() 
-  }
-}
-####################plot Levels
-for (i in 1:length(unique(stats_fir$Treatment))) {
-  for (j in 1:3) {
-    niv=stats_fir[which(stats_fir$Levels==unique(stats_fir$Levels)[i]),]
-    mean=niv[which(niv$stats==unique(niv$stats)[j]),]
-    name=paste0(dir2,"/",unique(niv$stats)[j],"_",unique(stats_fir$Levels)[i],".png")
-    png(filename=name,width = 726, height = 469)
-    p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Treatment),size=0.72)+
-      theme_bw()+
-      geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
-                 linetype="dashed",color = "black")+
-      annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
-               label = c("B","G","R","NIR","RE"))+
-      theme(legend.text=element_text(size=10))
-    if(j==1){
-      p=p+labs(title = paste0("Mean Feature Spectral"),
-               subtitle = paste0("Levels ",unique(niv$Levels)),
-               x = "Wavelength", y = "Reflectance (%)") 
+    dir3=paste0(dir,"/Replicate")
+    if(!file.exists(dir3)){
+      dir.create(dir3)
     }
-    if(j==2){
-      p=p+labs(title = paste0("SD Feature Spectral"),
-               subtitle = paste0("Levels ",unique(niv$Levels)),
-               x = "Wavelength", y = "Standard Deviation (%)") 
+    stats_fir=melt(stats_fir);names(stats_fir)=c("stats","wave","reflec","Replicate","Levels","Treatment")
+    which(stats_fir$Treatment=="N")
+    ####################plot Treatment
+    for (i in 1:length(unique(stats_fir$Treatment))) {
+      for (j in 1:3) {
+        Tra=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[i]),]
+        mean=Tra[which(Tra$stats==unique(Tra$stats)[j]),]
+        name=paste0(dir1,"/",unique(Tra$stats)[j],"_",unique(stats_fir$Treatment)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        ###########plot Treatment
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Levels,linetype=Replicate),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Treatment ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Treatment ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Standard Deviation") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Treatment ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
     }
-    if(j==3){
-      p=p+labs(title = paste0("CV Feature Spectral"),
-               subtitle = paste0("Levels ",unique(niv$Levels)),
-               x = "Wavelength", y = "Coefficient Variation (%)") 
+    ####################plot Levels
+    for (i in 1:length(unique(stats_fir$Levels))) {
+      for (j in 1:3) {
+        niv=stats_fir[which(stats_fir$Levels==unique(stats_fir$Levels)[i]),]
+        mean=niv[which(niv$stats==unique(niv$stats)[j]),]
+        mean$Treatment=as.factor(mean$Treatment);mean$Replicate=as.factor(mean$Replicate)
+        name=paste0(dir2,"/",unique(niv$stats)[j],"_",unique(stats_fir$Levels)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Treatment,linetype=Replicate),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Standard Deviation (%)") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
     }
-    print(p)
-    dev.off() 
+    ####################plot Replicates
+    for (i in 1:length(unique(stats_fir$Replicate))) {
+      for (j in 1:3) {
+        niv=stats_fir[which(stats_fir$Replicate==unique(stats_fir$Replicate)[i]),]
+        mean=niv[which(niv$stats==unique(niv$stats)[j]),]
+        mean$Levels=as.factor(mean$Levels);mean$Treatment=as.factor(mean$Treatment)
+        name=paste0(dir3,"/",unique(niv$stats)[j],"_",unique(stats_fir$Replicate)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Treatment,linetype=Levels),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Replicate ",unique(niv$Replicate)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Replicate ",unique(niv$Replicate)),
+                   x = "Wavelength", y = "Standard Deviation (%)") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Replicate ",unique(niv$Replicate)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
+    }}else{dir=paste0(getwd(),"/Plots")
+    if(!file.exists(dir)){
+      dir.create(dir)
     }
-  }
+    dir1=paste0(dir,"/Treatment")
+    if(!file.exists(dir1)){
+      dir.create(dir1)
+    }
+    dir2=paste0(dir,"/Levels")
+    if(!file.exists(dir2)){
+      dir.create(dir2)
+    }
+    stats_fir=melt(stats_fir);names(stats_fir)=c("stats","wave","reflec","Levels","Treatment")
+    for (i in 1:length(unique(stats_fir$Treatment))) {
+      for (j in 1:3) {
+        Tra=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[i]),]
+        mean=Tra[which(Tra$stats==unique(Tra$stats)[j]),]
+        name=paste0(dir1,"/",unique(Tra$stats)[j],"_",unique(stats_fir$Treatment)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        ###########plot Treatment
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Levels),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Standard Deviation") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
+    }
+    ####################plot Levels
+    for (i in 1:length(unique(stats_fir$Treatment))) {
+      for (j in 1:3) {
+        niv=stats_fir[which(stats_fir$Levels==unique(stats_fir$Levels)[i]),]
+        mean=niv[which(niv$stats==unique(niv$stats)[j]),]
+        name=paste0(dir2,"/",unique(niv$stats)[j],"_",unique(stats_fir$Levels)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Treatment),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Standard Deviation (%)") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
+    }}
 }
