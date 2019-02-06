@@ -484,7 +484,7 @@ plots_stats=function(stats_fir,Replicate=F){
         if(j==2){
           p=p+labs(title = paste0("SD Feature Spectral"),
                    subtitle = paste0("Levels ",unique(niv$Levels)),
-                   x = "Wavelength", y = "Standard Deviation (%)") 
+                   x = "Wavelength", y = "Standard Deviation") 
         }
         if(j==3){
           p=p+labs(title = paste0("CV Feature Spectral"),
@@ -518,7 +518,7 @@ plots_stats=function(stats_fir,Replicate=F){
         if(j==2){
           p=p+labs(title = paste0("SD Feature Spectral"),
                    subtitle = paste0("Replicate ",unique(niv$Replicate)),
-                   x = "Wavelength", y = "Standard Deviation (%)") 
+                   x = "Wavelength", y = "Standard Deviation") 
         }
         if(j==3){
           p=p+labs(title = paste0("CV Feature Spectral"),
@@ -596,7 +596,7 @@ plots_stats=function(stats_fir,Replicate=F){
         if(j==2){
           p=p+labs(title = paste0("SD Feature Spectral"),
                    subtitle = paste0("Levels ",unique(niv$Levels)),
-                   x = "Wavelength", y = "Standard Deviation (%)") 
+                   x = "Wavelength", y = "Standard Deviation") 
         }
         if(j==3){
           p=p+labs(title = paste0("CV Feature Spectral"),
