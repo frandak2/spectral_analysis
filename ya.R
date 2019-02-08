@@ -11,6 +11,7 @@ if(!require(car)){install.packages('car'); library(car)} else {library(car)}
 if(!require(nortest)){install.packages('nortest'); library(nortest)} else {library(nortest)}
 if(!require(PMCMR)){install.packages('PMCMR'); library(PMCMR)} else {library(PMCMR)}
 if(!require(DescTools)){install.packages('DescTools'); library(DescTools)} else {library(DescTools)}
+
 #########################lectura de firmas espectrales
 lee_firmas=function(dir_signature,Treatment,Levels,Replicates,Date_start,extension,decimal,Separations,delte_line,Wavelength_start,Wavelength_end,Col_Wavelength,Col_Reflectance){
   setwd(dir_signature)
