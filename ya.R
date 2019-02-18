@@ -11,6 +11,7 @@ if(!require(car)){install.packages('car'); library(car)} else {library(car)}
 if(!require(nortest)){install.packages('nortest'); library(nortest)} else {library(nortest)}
 if(!require(PMCMR)){install.packages('PMCMR'); library(PMCMR)} else {library(PMCMR)}
 if(!require(DescTools)){install.packages('DescTools'); library(DescTools)} else {library(DescTools)}
+
 #########################lectura de firmas espectrales
 lee_firmas=function(dir_signature,Treatment,Levels,Replicates,Date_start,extension,decimal,Separations,delte_line,Wavelength_start,Wavelength_end,Col_Wavelength,Col_Reflectance){
   setwd(dir_signature)
@@ -21,17 +22,18 @@ lee_firmas=function(dir_signature,Treatment,Levels,Replicates,Date_start,extensi
     Replicates=as.character(Replicates)
     e=list()
     for(i in 1:length(Treatment)){
-      # i=2
+       # i=2
       foldersT=list.dirs(foldersF,full.names = T)
       posT=str_which(foldersF,Treatment[i])
       matrix.fir=list()
       for(j in 1:length(Levels)){
+        # j=1
         x=paste0("/",Levels[j])
         foldersN=foldersF[posT]
         posN=str_which(foldersN,x)
         if(length(posN)>0){
           repli=lapply(Replicates,function(y){
-             # y=Replicates[2]
+             # y=Replicates[1]
             g=paste0("/",y)
             foldersR=foldersN[posN]
             posR=str_which(foldersR,g)
@@ -405,85 +407,571 @@ plot_IV=function(.IV,nameIV){
   p
 }
 #########################plot stats###############
-plots_stats=function(stats_fir){
-##########create dir
-dir=paste0(getwd(),"/Plots")
-if(!file.exists(dir)){
-  dir.create(dir)
+plots_stats=function(stats_fir,Replicate=F){
+  # stats_fir=stats_Beans;Replicate=T
+  if(Replicate){
+    dir=paste0(getwd(),"/Plots")
+    if(!file.exists(dir)){
+      dir.create(dir)
+    }
+    dir1=paste0(dir,"/Treatment")
+    if(!file.exists(dir1)){
+      dir.create(dir1)
+    }
+    dir2=paste0(dir,"/Levels")
+    if(!file.exists(dir2)){
+      dir.create(dir2)
+    }
+    dir3=paste0(dir,"/Replicate")
+    if(!file.exists(dir3)){
+      dir.create(dir3)
+    }
+    stats_fir=melt(stats_fir);names(stats_fir)=c("stats","wave","reflec","Replicate","Levels","Treatment")
+    which(stats_fir$Treatment=="N")
+    ####################plot Treatment
+    for (i in 1:length(unique(stats_fir$Treatment))) {
+      for (j in 1:3) {
+        Tra=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[i]),]
+        mean=Tra[which(Tra$stats==unique(Tra$stats)[j]),]
+        name=paste0(dir1,"/",unique(Tra$stats)[j],"_",unique(stats_fir$Treatment)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        ###########plot Treatment
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Levels,linetype=Replicate),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Treatment ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Treatment ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Standard Deviation") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Treatment ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
+    }
+    ####################plot Levels
+    for (i in 1:length(unique(stats_fir$Levels))) {
+      for (j in 1:3) {
+        niv=stats_fir[which(stats_fir$Levels==unique(stats_fir$Levels)[i]),]
+        mean=niv[which(niv$stats==unique(niv$stats)[j]),]
+        mean$Treatment=as.factor(mean$Treatment);mean$Replicate=as.factor(mean$Replicate)
+        name=paste0(dir2,"/",unique(niv$stats)[j],"_",unique(stats_fir$Levels)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Treatment,linetype=Replicate),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Standard Deviation") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
+    }
+    ####################plot Replicates
+    for (i in 1:length(unique(stats_fir$Replicate))) {
+      for (j in 1:3) {
+        niv=stats_fir[which(stats_fir$Replicate==unique(stats_fir$Replicate)[i]),]
+        mean=niv[which(niv$stats==unique(niv$stats)[j]),]
+        mean$Levels=as.factor(mean$Levels);mean$Treatment=as.factor(mean$Treatment)
+        name=paste0(dir3,"/",unique(niv$stats)[j],"_",unique(stats_fir$Replicate)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Treatment,linetype=Levels),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Replicate ",unique(niv$Replicate)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Replicate ",unique(niv$Replicate)),
+                   x = "Wavelength", y = "Standard Deviation") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Replicate ",unique(niv$Replicate)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
+    }}else{dir=paste0(getwd(),"/Plots")
+    if(!file.exists(dir)){
+      dir.create(dir)
+    }
+    dir1=paste0(dir,"/Treatment")
+    if(!file.exists(dir1)){
+      dir.create(dir1)
+    }
+    dir2=paste0(dir,"/Levels")
+    if(!file.exists(dir2)){
+      dir.create(dir2)
+    }
+    stats_fir=melt(stats_fir);names(stats_fir)=c("stats","wave","reflec","Levels","Treatment")
+    for (i in 1:length(unique(stats_fir$Treatment))) {
+      for (j in 1:3) {
+        Tra=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[i]),]
+        mean=Tra[which(Tra$stats==unique(Tra$stats)[j]),]
+        name=paste0(dir1,"/",unique(Tra$stats)[j],"_",unique(stats_fir$Treatment)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        ###########plot Treatment
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Levels),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Standard Deviation") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(Tra$Treatment)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
+    }
+    ####################plot Levels
+    for (i in 1:length(unique(stats_fir$Treatment))) {
+      for (j in 1:3) {
+        niv=stats_fir[which(stats_fir$Levels==unique(stats_fir$Levels)[i]),]
+        mean=niv[which(niv$stats==unique(niv$stats)[j]),]
+        name=paste0(dir2,"/",unique(niv$stats)[j],"_",unique(stats_fir$Levels)[i],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Treatment),size=0.72)+
+          theme_bw()+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))
+        if(j==1){
+          p=p+labs(title = paste0("Mean Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Reflectance (%)") 
+        }
+        if(j==2){
+          p=p+labs(title = paste0("SD Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Standard Deviation") 
+        }
+        if(j==3){
+          p=p+labs(title = paste0("CV Feature Spectral"),
+                   subtitle = paste0("Levels ",unique(niv$Levels)),
+                   x = "Wavelength", y = "Coefficient Variation (%)") 
+        }
+        print(p)
+        dev.off() 
+      }
+    }}
 }
-dir1=paste0(dir,"/Treatment")
-if(!file.exists(dir1)){
-  dir.create(dir1)
-}
-dir2=paste0(dir,"/Levels")
-if(!file.exists(dir2)){
-  dir.create(dir2)
-}
-stats_fir=melt(stats_fir);names(stats_fir)=c("stats","wave","reflec","Levels","Treatment")
-for (i in 1:length(unique(stats_fir$Treatment))) {
-  for (j in 1:3) {
-    Tra=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[i]),]
-    mean=Tra[which(Tra$stats==unique(Tra$stats)[j]),]
-    name=paste0(dir1,"/",unique(Tra$stats)[j],"_",unique(stats_fir$Treatment)[i],".png")
-    png(filename=name,width = 726, height = 469)
-    ###########plot Treatment
-    p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Levels),size=0.72)+
-      theme_bw()+
-      geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
-                 linetype="dashed",color = "black")+
-      annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
-               label = c("B","G","R","NIR","RE"))+
-      theme(legend.text=element_text(size=10))
-    if(j==1){
-      p=p+labs(title = paste0("Mean Feature Spectral"),
-               subtitle = paste0("Levels ",unique(Tra$Treatment)),
-               x = "Wavelength", y = "Reflectance (%)") 
+#########anova
+anova_fir=function(.fir,Replicate=F){
+  # stats_fir=Beans_sig;Replicate=T
+  if(Replicate){
+    dir=paste0(getwd(),"/ANOVA")
+    if(!file.exists(dir)){
+      dir.create(dir)
     }
-    if(j==2){
-      p=p+labs(title = paste0("SD Feature Spectral"),
-               subtitle = paste0("Levels ",unique(Tra$Treatment)),
-               x = "Wavelength", y = "Standard Deviation") 
+    dir1=paste0(dir,"/Treatment")
+    if(!file.exists(dir1)){
+      dir.create(dir1)
     }
-    if(j==3){
-      p=p+labs(title = paste0("CV Feature Spectral"),
-               subtitle = paste0("Levels ",unique(Tra$Treatment)),
-               x = "Wavelength", y = "Coefficient Variation (%)") 
+    dir2=paste0(dir,"/Levels")
+    if(!file.exists(dir2)){
+      dir.create(dir2)
     }
-    print(p)
-    dev.off() 
-  }
-}
-####################plot Levels
-for (i in 1:length(unique(stats_fir$Treatment))) {
-  for (j in 1:3) {
-    niv=stats_fir[which(stats_fir$Levels==unique(stats_fir$Levels)[i]),]
-    mean=niv[which(niv$stats==unique(niv$stats)[j]),]
-    name=paste0(dir2,"/",unique(niv$stats)[j],"_",unique(stats_fir$Levels)[i],".png")
-    png(filename=name,width = 726, height = 469)
-    p=ggplot(mean, aes(wave,reflec))+ geom_line(aes(color=Treatment),size=0.72)+
-      theme_bw()+
-      geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
-                 linetype="dashed",color = "black")+
-      annotate("text", x = c(480,560,645,780,700), y = max(mean$reflec)/2,
-               label = c("B","G","R","NIR","RE"))+
-      theme(legend.text=element_text(size=10))
-    if(j==1){
-      p=p+labs(title = paste0("Mean Feature Spectral"),
-               subtitle = paste0("Levels ",unique(niv$Levels)),
-               x = "Wavelength", y = "Reflectance (%)") 
+    dir3=paste0(dir,"/Replicate")
+    if(!file.exists(dir3)){
+      dir.create(dir3)
     }
-    if(j==2){
-      p=p+labs(title = paste0("SD Feature Spectral"),
-               subtitle = paste0("Levels ",unique(niv$Levels)),
-               x = "Wavelength", y = "Standard Deviation (%)") 
+    stats_fir=melt(stats_fir);names(stats_fir)=c("id","wave","reflec","Replicate","Levels","Treatment")
+    stats_fir$Levels=as.factor(stats_fir$Levels);stats_fir$Replicate=as.factor(stats_fir$Replicate);stats_fir$Treatment=as.factor(stats_fir$Treatment)
+    ####################plot Treatment
+    for (d in 1:length(unique(stats_fir$Treatment))) {
+      dfg=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[d]),]
+      print(unique(stats_fir$Treatment)[d])
+      anova=c();shapiro=c();bartlett=c();levene=c();lillie=c();kruskal=c();nemeyi=c()
+      for (i in 1:length(unique(dfg$wave))){
+        pos=which(dfg$wave==unique(dfg$wave)[i])
+        reflec=dfg$reflec[pos]
+        Levels=dfg$Levels[pos]
+        df=data.frame(reflec,Levels)
+        # normalidad
+        shapiro[i]=shapiro.test(reflec)$p.value
+        lillie[i]=lillie.test(reflec)$p.value
+        #homogenidad
+        levene[i]=leveneTest(reflec~Levels,data =df)$"Pr(>F)"[1]
+        bartlett[i]=bartlett.test(reflec~Levels,data =df)$p.value
+        #parametrico
+        anova[i]=summary(aov(reflec~Levels,data =df))[[1]][5]$"Pr(>F)"[1]
+        #no parametrico
+        kruskal[i]=kruskal.test(reflec~Levels,data =df)$p.value
+        nemeyi[i]=posthoc.kruskal.nemenyi.test(reflec~Levels, data=df)[3]
+        # print(i)
+      }
+      DATA=list(shapiro=shapiro,lillie=lillie,bartlett=bartlett,levene=levene,anova=anova,kruskal=kruskal)
+      for(x in 1:length(DATA)){
+        db=data.frame(wave=unique(stats_fir$wave),test=DATA[[x]])
+        name=paste0(dir1,"/",unique(stats_fir$Treatment)[d],"_",names(DATA[x]),".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(db, aes(wave,test))+ geom_line(size=0.7)+ 
+          theme_bw()+  
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor P")+
+          annotate("text", x = c(480,560,645,780,700), y = (max(db[2])/1.5), 
+                   label = c("B","G","R","NIR","RE"))+
+          labs(title =paste0("Test de ",names(DATA[x])), subtitle = paste0("Treatment ",unique(stats_fir$Treatment)[d]))
+        print(p)
+        dev.off()
+      }
+      ####################
+      E_nemeyi=melt(nemeyi);E_nemeyi$compare=as.factor(paste0(E_nemeyi$Var1,"-",E_nemeyi$Var2))
+      each=length(unique(E_nemeyi$compare))
+      E_nemeyi$wave=rep(unique(stats_fir$wave),each=each)
+      pos=which(is.na(E_nemeyi$value))
+      if(length(pos)>0){
+        E_nemeyi=E_nemeyi[-pos,]
+      }
+      for(q in 1:length(unique(DATA$compare))){
+        DATA=E_nemeyi[c(which(E_nemeyi$Var2==unique(E_nemeyi$Var2)[1]),which(E_nemeyi$Var1==unique(E_nemeyi$Var1)[1])),]
+        name=paste0(dir1,"/",unique(stats_fir$Treatment)[d],"_Nemenyi_",unique(DATA$compare)[q],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(DATA, aes(wave,value))+ geom_line(aes(color=compare),size=0.72)+ 
+          theme_bw()+
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor-p")+
+          annotate("text", x = c(480,560,645,780,700), y = 0.5, 
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))+
+          labs(title ="Pos-Hoc Test de Nemeyi", subtitle = paste0("Treatment ",unique(stats_fir$Treatment)[d]))
+        print(p)
+        dev.off()
+      }
     }
-    if(j==3){
-      p=p+labs(title = paste0("CV Feature Spectral"),
-               subtitle = paste0("Levels ",unique(niv$Levels)),
-               x = "Wavelength", y = "Coefficient Variation (%)") 
+    ####################plot Levels
+    for (d in 1:length(unique(stats_fir$Levels))) {
+      dfg=stats_fir[which(stats_fir$Levels==unique(stats_fir$Levels)[d]),]
+      print(unique(stats_fir$Levels)[d])
+      for (i in 1:length(unique(dfg$wave))){
+        pos=which(dfg$wave==unique(dfg$wave)[i])
+        reflec=dfg$reflec[pos]
+        Levels=dfg$Treatment[pos]
+        df=data.frame(reflec,Levels)
+        # normalidad
+        shapiro[i]=shapiro.test(reflec)$p.value
+        lillie[i]=lillie.test(reflec)$p.value
+        #homogenidad
+        levene[i]=leveneTest(reflec~Levels,data =df)$"Pr(>F)"[1]
+        bartlett[i]=bartlett.test(reflec~Levels,data =df)$p.value
+        #parametrico
+        anova[i]=summary(aov(reflec~Levels,data =df))[[1]][5]$"Pr(>F)"[1]
+        #no parametrico
+        kruskal[i]=kruskal.test(reflec~Levels,data =df)$p.value
+        nemeyi[i]=posthoc.kruskal.nemenyi.test(reflec~Levels, data=df)[3]
+        # print(i)
+      }
+      DATA=list(shapiro=shapiro,lillie=lillie,bartlett=bartlett,levene=levene,anova=anova,kruskal=kruskal)
+      for(x in 1:length(DATA)){
+        db=data.frame(wave=unique(stats_fir$wave),test=DATA[[x]])
+        name=paste0(dir2,"/",unique(stats_fir$Levels)[d],"_",names(DATA[x]),".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(db, aes(wave,test))+ geom_line(size=0.7)+ 
+          theme_bw()+  
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor P")+
+          annotate("text", x = c(480,560,645,780,700), y = (max(db[2])/1.5), 
+                   label = c("B","G","R","NIR","RE"))+
+          labs(title =paste0("Test de ",names(DATA[x])), subtitle = paste0("Level ",unique(stats_fir$Levels)[d]))
+        print(p)
+        dev.off()
+      }
+      ####################
+      E_nemeyi=melt(nemeyi);E_nemeyi$compare=as.factor(paste0(E_nemeyi$Var1,"-",E_nemeyi$Var2))
+      each=length(unique(E_nemeyi$compare))
+      E_nemeyi$wave=rep(unique(stats_fir$wave),each=each)
+      pos=which(is.na(E_nemeyi$value))
+      if(length(pos)>0){
+        E_nemeyi=E_nemeyi[-pos,]
+      }
+      for(q in 1:length(unique(DATA$compare))){
+        DATA=E_nemeyi[c(which(E_nemeyi$Var2==unique(E_nemeyi$Var2)[1]),which(E_nemeyi$Var1==unique(E_nemeyi$Var1)[1])),]
+        name=paste0(dir2,"/",unique(stats_fir$Levels)[d],"_Nemenyi_",unique(DATA$compare)[q],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(DATA, aes(wave,value))+ geom_line(aes(color=compare),size=0.72)+ 
+          theme_bw()+
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor-p")+
+          annotate("text", x = c(480,560,645,780,700), y = 0.5, 
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))+
+          labs(title ="Pos-Hoc Test de Nemeyi", subtitle = paste0("Levels ",unique(stats_fir$Levels)[d]))
+        print(p)
+        dev.off()
+      }
     }
-    print(p)
-    dev.off() 
+    ####################plot Replicates
+    for (d in 1:length(unique(stats_fir$Replicate))) {
+      dfg=stats_fir[which(stats_fir$Replicate==unique(stats_fir$Replicate)[d]),]
+      print(unique(stats_fir$Replicate)[d])
+      for (i in 1:length(unique(dfg$wave))){
+        pos=which(dfg$wave==unique(dfg$wave)[i])
+        reflec=dfg$reflec[pos]
+        Levels=dfg$Treatment[pos]
+        df=data.frame(reflec,Levels)
+        # normalidad
+        shapiro[i]=shapiro.test(reflec)$p.value
+        lillie[i]=lillie.test(reflec)$p.value
+        #homogenidad
+        levene[i]=leveneTest(reflec~Levels,data =df)$"Pr(>F)"[1]
+        bartlett[i]=bartlett.test(reflec~Levels,data =df)$p.value
+        #parametrico
+        anova[i]=summary(aov(reflec~Levels,data =df))[[1]][5]$"Pr(>F)"[1]
+        #no parametrico
+        kruskal[i]=kruskal.test(reflec~Levels,data =df)$p.value
+        nemeyi[i]=posthoc.kruskal.nemenyi.test(reflec~Levels, data=df)[3]
+        # print(i)
+      }
+      DATA=list(shapiro=shapiro,lillie=lillie,bartlett=bartlett,levene=levene,anova=anova,kruskal=kruskal)
+      for(x in 1:length(DATA)){
+        db=data.frame(wave=unique(stats_fir$wave),test=DATA[[x]])
+        name=paste0(dir3,"/",unique(stats_fir$Replicate)[d],"_",names(DATA[x]),".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(db, aes(wave,test))+ geom_line(size=0.7)+ 
+          theme_bw()+  
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor P")+
+          annotate("text", x = c(480,560,645,780,700), y = (max(db[2])/1.5), 
+                   label = c("B","G","R","NIR","RE"))+
+          labs(title =paste0("Test de ",names(DATA[x])), subtitle = paste0("Replicate ",unique(stats_fir$Replicate)[d]))
+        print(p)
+        dev.off()
+      }
+      ####################
+      E_nemeyi=melt(nemeyi);E_nemeyi$compare=as.factor(paste0(E_nemeyi$Var1,"-",E_nemeyi$Var2))
+      each=length(unique(E_nemeyi$compare))
+      E_nemeyi$wave=rep(unique(stats_fir$wave),each=each)
+      pos=which(is.na(E_nemeyi$value))
+      if(length(pos)>0){
+        E_nemeyi=E_nemeyi[-pos,]
+      }
+      for(q in 1:length(unique(DATA$compare))){
+        DATA=E_nemeyi[c(which(E_nemeyi$Var2==unique(E_nemeyi$Var2)[1]),which(E_nemeyi$Var1==unique(E_nemeyi$Var1)[1])),]
+        name=paste0(dir3,"/",unique(stats_fir$Replicate)[d],"_Nemenyi_",unique(DATA$compare)[q],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(DATA, aes(wave,value))+ geom_line(aes(color=compare),size=0.72)+ 
+          theme_bw()+
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor-p")+
+          annotate("text", x = c(480,560,645,780,700), y = 0.5, 
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))+
+          labs(title ="Pos-Hoc Test de Nemeyi", subtitle = paste0("Replicate ",unique(stats_fir$Replicate)[d]))
+        print(p)
+        dev.off()
+      }
+    }
+  }else{
+    dir=paste0(getwd(),"/ANOVA")
+    if(!file.exists(dir)){
+      dir.create(dir)
+    }
+    dir1=paste0(dir,"/Treatment")
+    if(!file.exists(dir1)){
+      dir.create(dir1)
+    }
+    dir2=paste0(dir,"/Levels")
+    if(!file.exists(dir2)){
+      dir.create(dir2)
+    }
+    stats_fir=melt(stats_fir);names(stats_fir)=c("id","wave","reflec","Levels","Treatment")
+    stats_fir$Levels=as.factor(stats_fir$Levels);stats_fir$Treatment=as.factor(stats_fir$Treatment)
+    ####################plot Treatment
+    for (d in 1:length(unique(stats_fir$Treatment))) {
+      dfg=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[d]),]
+      print(unique(stats_fir$Treatment)[d])
+      anova=c();shapiro=c();bartlett=c();levene=c();lillie=c();kruskal=c();nemeyi=c()
+      for (i in 1:length(unique(dfg$wave))){
+        pos=which(dfg$wave==unique(dfg$wave)[i])
+        reflec=dfg$reflec[pos]
+        Levels=dfg$Levels[pos]
+        df=data.frame(reflec,Levels)
+        # normalidad
+        shapiro[i]=shapiro.test(reflec)$p.value
+        lillie[i]=lillie.test(reflec)$p.value
+        #homogenidad
+        levene[i]=leveneTest(reflec~Levels,data =df)$"Pr(>F)"[1]
+        bartlett[i]=bartlett.test(reflec~Levels,data =df)$p.value
+        #parametrico
+        anova[i]=summary(aov(reflec~Levels,data =df))[[1]][5]$"Pr(>F)"[1]
+        #no parametrico
+        kruskal[i]=kruskal.test(reflec~Levels,data =df)$p.value
+        nemeyi[i]=posthoc.kruskal.nemenyi.test(reflec~Levels, data=df)[3]
+        # print(i)
+      }
+      DATA=list(shapiro=shapiro,lillie=lillie,bartlett=bartlett,levene=levene,anova=anova,kruskal=kruskal)
+      for(x in 1:length(DATA)){
+        db=data.frame(wave=unique(stats_fir$wave),test=DATA[[x]])
+        name=paste0(dir1,"/",unique(stats_fir$Treatment)[d],"_",names(DATA[x]),".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(db, aes(wave,test))+ geom_line(size=0.7)+ 
+          theme_bw()+  
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor P")+
+          annotate("text", x = c(480,560,645,780,700), y = (max(db[2])/1.5), 
+                   label = c("B","G","R","NIR","RE"))+
+          labs(title =paste0("Test de ",names(DATA[x])), subtitle = paste0("Treatment ",unique(stats_fir$Treatment)[d]))
+        print(p)
+        dev.off()
+      }
+      ####################
+      E_nemeyi=melt(nemeyi);E_nemeyi$compare=as.factor(paste0(E_nemeyi$Var1,"-",E_nemeyi$Var2))
+      each=length(unique(E_nemeyi$compare))
+      E_nemeyi$wave=rep(unique(stats_fir$wave),each=each)
+      pos=which(is.na(E_nemeyi$value))
+      if(length(pos)>0){
+        E_nemeyi=E_nemeyi[-pos,]
+      }
+      for(q in 1:length(unique(DATA$compare))){
+        DATA=E_nemeyi[c(which(E_nemeyi$Var2==unique(E_nemeyi$Var2)[1]),which(E_nemeyi$Var1==unique(E_nemeyi$Var1)[1])),]
+        name=paste0(dir1,"/",unique(stats_fir$Treatment)[d],"_Nemenyi_",unique(DATA$compare)[q],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(DATA, aes(wave,value))+ geom_line(aes(color=compare),size=0.72)+ 
+          theme_bw()+
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor-p")+
+          annotate("text", x = c(480,560,645,780,700), y = 0.5, 
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))+
+          labs(title ="Pos-Hoc Test de Nemeyi", subtitle = paste0("Treatment ",unique(stats_fir$Treatment)[d]))
+        print(p)
+        dev.off()
+      }
+    }
+    ####################plot Levels
+    for (d in 1:length(unique(stats_fir$Levels))) {
+      dfg=stats_fir[which(stats_fir$Levels==unique(stats_fir$Levels)[d]),]
+      print(unique(stats_fir$Levels)[d])
+      for (i in 1:length(unique(dfg$wave))){
+        pos=which(dfg$wave==unique(dfg$wave)[i])
+        reflec=dfg$reflec[pos]
+        Levels=dfg$Treatment[pos]
+        df=data.frame(reflec,Levels)
+        # normalidad
+        shapiro[i]=shapiro.test(reflec)$p.value
+        lillie[i]=lillie.test(reflec)$p.value
+        #homogenidad
+        levene[i]=leveneTest(reflec~Levels,data =df)$"Pr(>F)"[1]
+        bartlett[i]=bartlett.test(reflec~Levels,data =df)$p.value
+        #parametrico
+        anova[i]=summary(aov(reflec~Levels,data =df))[[1]][5]$"Pr(>F)"[1]
+        #no parametrico
+        kruskal[i]=kruskal.test(reflec~Levels,data =df)$p.value
+        nemeyi[i]=posthoc.kruskal.nemenyi.test(reflec~Levels, data=df)[3]
+        # print(i)
+      }
+      DATA=list(shapiro=shapiro,lillie=lillie,bartlett=bartlett,levene=levene,anova=anova,kruskal=kruskal)
+      for(x in 1:length(DATA)){
+        db=data.frame(wave=unique(stats_fir$wave),test=DATA[[x]])
+        name=paste0(dir2,"/",unique(stats_fir$Levels)[d],"_",names(DATA[x]),".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(db, aes(wave,test))+ geom_line(size=0.7)+ 
+          theme_bw()+  
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor P")+
+          annotate("text", x = c(480,560,645,780,700), y = (max(db[2])/1.5), 
+                   label = c("B","G","R","NIR","RE"))+
+          labs(title =paste0("Test de ",names(DATA[x])), subtitle = paste0("Level ",unique(stats_fir$Levels)[d]))
+        print(p)
+        dev.off()
+      }
+      ####################
+      E_nemeyi=melt(nemeyi);E_nemeyi$compare=as.factor(paste0(E_nemeyi$Var1,"-",E_nemeyi$Var2))
+      each=length(unique(E_nemeyi$compare))
+      E_nemeyi$wave=rep(unique(stats_fir$wave),each=each)
+      pos=which(is.na(E_nemeyi$value))
+      if(length(pos)>0){
+        E_nemeyi=E_nemeyi[-pos,]
+      }
+      for(q in 1:length(unique(DATA$compare))){
+        DATA=E_nemeyi[c(which(E_nemeyi$Var2==unique(E_nemeyi$Var2)[1]),which(E_nemeyi$Var1==unique(E_nemeyi$Var1)[1])),]
+        name=paste0(dir2,"/",unique(stats_fir$Levels)[d],"_Nemenyi_",unique(DATA$compare)[q],".png")
+        png(filename=name,width = 726, height = 469)
+        p=ggplot(DATA, aes(wave,value))+ geom_line(aes(color=compare),size=0.72)+ 
+          theme_bw()+
+          geom_hline(yintercept =0.05,linetype="solid",color = "red")+
+          geom_vline(xintercept = c(450,510,530,590,620,670,740,820),
+                     linetype="dashed",color = "black")+
+          labs(x = "Longitud de onda", y = "Valor-p")+
+          annotate("text", x = c(480,560,645,780,700), y = 0.5, 
+                   label = c("B","G","R","NIR","RE"))+
+          theme(legend.text=element_text(size=10))+
+          labs(title ="Pos-Hoc Test de Nemeyi", subtitle = paste0("Levels ",unique(stats_fir$Levels)[d]))
+        print(p)
+        dev.off()
+      }
     }
   }
 }
