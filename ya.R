@@ -18,6 +18,7 @@ lee_firmas=function(dir_signature,Treatment,Levels,Replicates,Date_start,extensi
   Treatment=as.character(Treatment)
   Levels=as.character(Levels)
   foldersF=list.dirs(getwd(),full.names = T)
+  suppressWarnings(
   if(!missing(Replicates)){
     Replicates=as.character(Replicates)
     e=list()
@@ -164,7 +165,7 @@ lee_firmas=function(dir_signature,Treatment,Levels,Replicates,Date_start,extensi
       
     }
   }
-  }
+  })
   return(e)
   print("Done and saved")
 }
@@ -430,7 +431,8 @@ plots_stats=function(stats_fir,Replicate=F){
     which(stats_fir$Treatment=="N")
     ####################plot Treatment
     for (i in 1:length(unique(stats_fir$Treatment))) {
-      for (j in 1:3) {
+      for (j in 1:3) {  
+        
         Tra=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[i]),]
         mean=Tra[which(Tra$stats==unique(Tra$stats)[j]),]
         name=paste0(dir1,"/",unique(Tra$stats)[j],"_",unique(stats_fir$Treatment)[i],".png")
