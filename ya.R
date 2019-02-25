@@ -432,7 +432,6 @@ plots_stats=function(stats_fir,Replicate=F){
     ####################plot Treatment
     for (i in 1:length(unique(stats_fir$Treatment))) {
       for (j in 1:3) {  
-        
         Tra=stats_fir[which(stats_fir$Treatment==unique(stats_fir$Treatment)[i]),]
         mean=Tra[which(Tra$stats==unique(Tra$stats)[j]),]
         name=paste0(dir1,"/",unique(Tra$stats)[j],"_",unique(stats_fir$Treatment)[i],".png")
