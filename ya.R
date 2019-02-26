@@ -5,12 +5,12 @@ if(!require(utils)){install.packages('utils');library(utils)}else{library(utils)
 if(!require(signal)){install.packages('signal');library(signal)}else{library(signal)}
 if(!require(reshape2)){install.packages('reshape2');library(reshape2)}else{library(reshape2)}
 if(!require(scales)){install.packages('scales');library(scales)}else{library(scales)}
-if(!require(MASS)){install.packages('MASS'); library(MASS)} else {library(MASS)}
-if(!require(reshape2)){install.packages('reshape2'); library(reshape2)} else {library(reshape2)}
-if(!require(car)){install.packages('car'); library(car)} else {library(car)}
-if(!require(nortest)){install.packages('nortest'); library(nortest)} else {library(nortest)}
-if(!require(PMCMR)){install.packages('PMCMR'); library(PMCMR)} else {library(PMCMR)}
-if(!require(DescTools)){install.packages('DescTools'); library(DescTools)} else {library(DescTools)}
+if(!require(MASS)){install.packages('MASS');library(MASS)}else{library(MASS)}
+if(!require(reshape2)){install.packages('reshape2'); library(reshape2)}else{library(reshape2)}
+if(!require(car)){install.packages('car');library(car)}else{library(car)}
+if(!require(nortest)){install.packages('nortest');library(nortest)}else{library(nortest)}
+if(!require(PMCMR)){install.packages('PMCMR');library(PMCMR)}else{library(PMCMR)}
+if(!require(DescTools)){install.packages('DescTools');library(DescTools)}else{library(DescTools)}
 
 #########################lectura de firmas espectrales
 lee_firmas=function(dir_signature,Treatment,Levels,Replicates,Date_start,extension,decimal,Separations,delte_line,Wavelength_start,Wavelength_end,Col_Wavelength,Col_Reflectance){
